@@ -70,7 +70,7 @@ public class MaxSolveArchive extends CandidateTestArchive {
 	private void eliminateDuplicates(List<Individual> archive,
 			EquivalenceComparator<Individual> comparator) {
 		for (int ind1 = 0; ind1 < archive.size(); ind1++) {
-			for (int ind2 = archive.size(); ind2 > ind1; ind2--) {
+			for (int ind2 = archive.size() - 1; ind2 > ind1; ind2--) {
 				if (comparator.equal(archive.get(ind1), archive.get(ind2))) {
 					archive.remove(ind2);
 				}

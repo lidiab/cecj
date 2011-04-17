@@ -78,7 +78,7 @@ public class OthelloGame implements BoardGame {
 		currentPlayer = getOpponent(currentPlayer);
 	}
 
-	private boolean canPlace(int row, int col, int curPlayer) {
+	public boolean canPlace(int row, int col, int curPlayer) {
 		return (!board.findDirections(row, col, curPlayer).isEmpty());
 	}
 
@@ -105,5 +105,13 @@ public class OthelloGame implements BoardGame {
 
 	public void pass() {
 		currentPlayer = getOpponent(currentPlayer);
+	}
+	
+	public OthelloGame clone()
+	{
+		OthelloGame clone = new OthelloGame();
+		clone.board = board.clone();
+		clone.currentPlayer = currentPlayer;
+		return clone;
 	}
 }
