@@ -1,12 +1,9 @@
 package cecj.neatq;
 
-import java.io.DataInput;
-import java.io.IOException;
-import java.io.LineNumberReader;
-
 import ec.EvolutionState;
 import ec.Individual;
 import ec.Species;
+import ec.simple.SimpleFitness;
 import ec.util.Parameter;
 
 public class NeatNeuralNetworkSpecies extends Species {
@@ -17,12 +14,17 @@ public class NeatNeuralNetworkSpecies extends Species {
 	public int outNodesNumber;
 	public int initialLinkNumber;
 	
+	public NeatNeuralNetworkIndividual i_prototype;
+	
+	NeatNeuralNetworkIndividual newIndywidual = null;
+	
 	public Parameter defaultBase() {
-		return null;
+		return new Parameter("NeatNeuralNetworkSpecies");
 	}
 
 	@Override
 	public void setup(EvolutionState state, Parameter base) {
+		//i_prototype = new NeatNeuralNetworkIndividual(inNodesNumber, outNodesNumber, initialLinkNumber, state.random[thread]);
 		super.setup(state, base);
 		
 		addLinkMutationProbability = state.parameters.getDouble(base.push("addLinkMutationProbability"), null);
@@ -34,11 +36,14 @@ public class NeatNeuralNetworkSpecies extends Species {
 	
 	@Override
 	public Individual newIndividual(EvolutionState state, int thread) {
-		NeatNeuralNetworkIndividual newIndywidual;
-		newIndywidual = new NeatNeuralNetworkIndividual(inNodesNumber, 
-				outNodesNumber, initialLinkNumber, state.random[thread]);
-		newIndywidual.species = this;
-		return newIndywidual;
+		if (newIndywidual == null)
+		{
+			newIndywidual = new NeatNeuralNetworkIndividual(inNodesNumber, 
+					outNodesNumber, initialLinkNumber, state.random[thread]);
+			newIndywidual.species = this;
+			newIndywidual.fitness = new SimpleFitness();
+		}
+		return (Individual) newIndywidual.clone();
 	}
 }
 

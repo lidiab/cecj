@@ -29,7 +29,7 @@ public class NeuralNetworkFenotype {
 		{
 			this.value = value;
 			neuronID = id;
-			prevNeurons = null;
+			prevNeurons = new ArrayList<Link>();
 		}
 		
 		public Neuron(int id)
@@ -55,11 +55,24 @@ public class NeuralNetworkFenotype {
 				value = 1.0 / (1.0 + Math.exp(value));
 			}
 		}
+		
+		@Override
+		public String toString() {
+			return neuronID + ": " + prevNeurons.toString();
+		}
 	}
 	
 	ArrayList<Neuron> fenotype;
 	ArrayList<Neuron> inputs;
 	ArrayList<Neuron> outputs;
+	
+	public NeuralNetworkFenotype(NeatNeuralNetworkIndividual genotype)
+	{
+		fenotype = new ArrayList<Neuron>();
+		inputs = new ArrayList<Neuron>();
+		outputs = new ArrayList<Neuron>();
+		readFromGenotype(genotype);
+	}
 	
 	public Neuron findGene(int id, NeatNeuralNetworkIndividual genotype)
 	{
@@ -77,7 +90,7 @@ public class NeuralNetworkFenotype {
 		if(genotype.isInNode(id))
 		{
 			inputs.add(n);
-			n.prevNeurons = null;
+			n.prevNeurons = new ArrayList<Link>();
 		}
 		else if(genotype.isOutNode(id))
 		{

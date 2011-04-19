@@ -14,7 +14,7 @@ public class NeatMutationPipeline extends BreedingPipeline
 
 	public Parameter defaultBase() 
 	{
-		return VectorDefaults.base().push(P_OURMUTATION);
+		return new Parameter("NeatMutation");
 	}
 
 	public static final int NUM_SOURCES = 1;

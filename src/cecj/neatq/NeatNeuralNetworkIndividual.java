@@ -2,7 +2,9 @@ package cecj.neatq;
 
 import java.util.ArrayList;
 
+import ec.Fitness;
 import ec.Individual;
+import ec.simple.SimpleFitness;
 import ec.util.MersenneTwisterFast;
 import ec.util.Parameter;
 
@@ -46,6 +48,11 @@ public class NeatNeuralNetworkIndividual extends Individual {
 			
 			return clone;
 		}
+		
+		@Override
+		public String toString() {
+			return ""+this.innovationNumber+ ": " +inNode+" -> "+outNode;
+		}
 	}
 	
 	private static final int TRYADDNUMBER = 10;
@@ -83,7 +90,12 @@ public class NeatNeuralNetworkIndividual extends Individual {
 		}			
 	}
 	
-	public boolean isInNode(int node)
+	public NeatNeuralNetworkIndividual()
+	{
+		
+	}
+	
+public boolean isInNode(int node)
 	{
 		if(node < inNodesNumber)
 		{
@@ -94,7 +106,7 @@ public class NeatNeuralNetworkIndividual extends Individual {
 
 	public boolean isOutNode(int node)
 	{
-		if(isOutNode(node))
+		if((node >= inNodesNumber) && (node < inNodesNumber + outNodesNumber))
 		{
 			return true;
 		}
@@ -103,6 +115,7 @@ public class NeatNeuralNetworkIndividual extends Individual {
 	
 	public void addNodeMutation(MersenneTwisterFast rand)
 	{
+		System.out.println("NM1: "+genotype.toString());
 		for(int i = 0; i < TRYADDNUMBER; i++)
 		{
 			if(tryAddNodeMutation(rand))
@@ -110,6 +123,7 @@ public class NeatNeuralNetworkIndividual extends Individual {
 				break;
 			}
 		}
+		System.out.println("NM2: "+genotype.toString());
 	}
 	
 	public boolean tryAddNodeMutation(MersenneTwisterFast rand)
@@ -155,6 +169,7 @@ public class NeatNeuralNetworkIndividual extends Individual {
 	
 	public void addLinkMutation(MersenneTwisterFast rand)
 	{
+		System.out.println("LM1: "+genotype.toString());
 		for(int i = 0; i < TRYADDNUMBER; i++)
 		{
 			if(tryAddLinkMutation(rand))
@@ -162,10 +177,15 @@ public class NeatNeuralNetworkIndividual extends Individual {
 				break;
 			}
 		}
+		System.out.println("LM2: "+genotype.toString());
 	}
 	
 	public boolean isLinkAllowed(int inNode, int outNode)
 	{
+		if(inNode == outNode)
+		{
+			return false;
+		}
 		for(int i = 0; i < genotype.size(); i++)
 		{
 			if(genotype.get(i).inNode == inNode)
@@ -194,6 +214,7 @@ public class NeatNeuralNetworkIndividual extends Individual {
 	
 	public boolean isCycle(int inNode, int destNode)
 	{
+		//System.out.println(inNode+" => "+destNode);
 		for(int i = 0; i < genotype.size(); i++)
 		{
 			if(genotype.get(i).inNode == inNode)
@@ -221,6 +242,8 @@ public class NeatNeuralNetworkIndividual extends Individual {
 		int i = 0;
 		int j = 0;
 		
+		System.out.println("P1: " + genotype.toString());
+		System.out.println("P2: " + parent.genotype.toString());
 		while((i < this.genotype.size()) && (j < parent.genotype.size()))
 		{
 			if(this.genotype.get(i).innovationNumber == parent.genotype.get(j).innovationNumber)
@@ -270,13 +293,50 @@ public class NeatNeuralNetworkIndividual extends Individual {
 				offspring.genotype.add(parent.genotype.get(j).clone());
 			}
 		}
+		System.out.println("O:" + offspring.genotype.toString());
 		
+		int max = 0;
+		for(Gene g : offspring.genotype)
+		{
+			if(g.inNode > max)
+			{
+				max = g.inNode;
+			}
+			if(g.outNode > max)
+			{
+				max = g.outNode;
+			}
+		}
+		
+		max -= offspring.inNodesNumber + offspring.outNodesNumber;
+		
+		if(max >= offspring.hiddenNodesNumber)
+		{
+			offspring.hiddenNodesNumber = max + 1;
+		}
+		
+		offspring.fitness = new SimpleFitness();
+		offspring.species = this.species;
 		return offspring;
 	}
 	
 	public Parameter defaultBase() {
-		// TODO Auto-generated method stub
-		return null;
+		return new Parameter("NeatNeuralNetwork");
+	}
+	
+	@Override
+	public Object clone() {
+		NeatNeuralNetworkIndividual clone = new NeatNeuralNetworkIndividual();
+		clone.genotype = this.genotype;
+		clone.hiddenNodesNumber = this.hiddenNodesNumber;
+		clone.inNodesNumber = this.inNodesNumber;
+		clone.outNodesNumber = this.outNodesNumber;
+		if (this.fitness != null)
+		{
+			clone.fitness = (Fitness)(this.fitness.clone());
+		}
+		clone.species = this.species;
+		return clone;
 	}
 
 	@Override
