@@ -1,18 +1,20 @@
 package cecj.neatq;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import ec.Fitness;
 import ec.Individual;
+import ec.Species;
 import ec.simple.SimpleFitness;
 import ec.util.MersenneTwisterFast;
 import ec.util.Parameter;
 
-public class NeatNeuralNetworkIndividual extends Individual {
+public class NeatIndividual extends Individual {
 
 	public static class Gene
 	{
-		protected static int newInnovationNumber = 0;
+		//protected static int newInnovationNumber = 0;
 		public int inNode;
 		public int outNode;
 		public double weight;
@@ -28,19 +30,19 @@ public class NeatNeuralNetworkIndividual extends Individual {
 			this.innovationNumber = innovationNumber;			
 		}
 		
-		public Gene(int inNode, int outNode, double weight, boolean enable)
+		/*public Gene(int inNode, int outNode, double weight, boolean enable)
 		{
 			this.inNode = inNode;
 			this.outNode = outNode;
 			this.weight = weight;
 			this.enable = enable;
 			this.innovationNumber = newInnovationNumber++;			
-		}
+		}*/
 		
-		public Gene()
+		/*public Gene()
 		{
 			this.innovationNumber = newInnovationNumber++;
-		}
+		}*/
 		
 		public Gene clone()
 		{
@@ -51,22 +53,27 @@ public class NeatNeuralNetworkIndividual extends Individual {
 		
 		@Override
 		public String toString() {
-			return ""+this.innovationNumber+ ": " +inNode+" -> "+outNode;
+			if (enable)
+				return ""+this.innovationNumber+ ": " +inNode+" -> "+outNode;
+			else
+				return "";
 		}
 	}
 	
-	private static final int TRYADDNUMBER = 10;
-	ArrayList<Gene> genotype = new ArrayList<Gene>();
-	int inNodesNumber;
+	private static final int TRYADDNUMBER = 10; //TODO parametr
+	public ArrayList<Gene> genotype = new ArrayList<Gene>();
+	/*int inNodesNumber;
 	int outNodesNumber;
-	int hiddenNodesNumber;
+	int hiddenNodesNumber;*/
 	
-	public NeatNeuralNetworkIndividual(int inNodesNum, int outNodesNum, int linkNum, MersenneTwisterFast rand)
+	public NeatIndividual(int inNodesNum, int outNodesNum, int linkNum, MersenneTwisterFast rand, Species species)
 	{
 		int[] tab = new int[inNodesNum * outNodesNum];
-		this.inNodesNumber = inNodesNum;
+		/*this.inNodesNumber = inNodesNum;
 		this.outNodesNumber = outNodesNum;
-		this.hiddenNodesNumber = 0;
+		this.hiddenNodesNumber = 0;*/
+		
+		this.species = species;
 		
 		for(int i = 0; i < tab.length; i++)
 		{
@@ -85,19 +92,24 @@ public class NeatNeuralNetworkIndividual extends Individual {
 		{
 			int inNode = tab[i] / outNodesNum;
 			int outNode = inNodesNum + tab[i] % outNodesNum;
-			Gene newGene = new Gene(inNode, outNode, 1.0, true);
+			Gene newGene = new Gene(inNode, outNode, newWeight(rand), true, species().innovationNumber++);
 			genotype.add(newGene);
 		}			
 	}
 	
-	public NeatNeuralNetworkIndividual()
+	public NeatIndividual()
 	{
 		
 	}
 	
+	NeatNeuralNetworkSpecies species()
+	{
+		return (NeatNeuralNetworkSpecies)species;
+	}
+	
 public boolean isInNode(int node)
 	{
-		if(node < inNodesNumber)
+		if(node < species().inNodesNumber)
 		{
 			return true;
 		}
@@ -106,16 +118,22 @@ public boolean isInNode(int node)
 
 	public boolean isOutNode(int node)
 	{
-		if((node >= inNodesNumber) && (node < inNodesNumber + outNodesNumber))
+		if((node >= species().inNodesNumber) 
+				&& (node < species().inNodesNumber + species().outNodesNumber))
 		{
 			return true;
 		}
 		return false;
 	}
 	
+	public double newWeight(MersenneTwisterFast rand)
+	{
+		return rand.nextDouble() * 2.0 - 1.0;
+	}
+	
 	public void addNodeMutation(MersenneTwisterFast rand)
 	{
-		System.out.println("NM1: "+genotype.toString());
+		//System.out.println("NM1: "+genotype.toString());
 		for(int i = 0; i < TRYADDNUMBER; i++)
 		{
 			if(tryAddNodeMutation(rand))
@@ -123,53 +141,92 @@ public boolean isInNode(int node)
 				break;
 			}
 		}
-		System.out.println("NM2: "+genotype.toString());
+		//System.out.println("NM2: "+genotype.toString());
 	}
 	
 	public boolean tryAddNodeMutation(MersenneTwisterFast rand)
 	{
 		int index = rand.nextInt(genotype.size());
+		if( ! genotype.get(index).enable)
+		{
+			return false;
+		}
+		
 		if(isOutNode(genotype.get(index).inNode))
 		{
 			return false;
 		}
 		
-		int newNode = inNodesNumber + outNodesNumber + hiddenNodesNumber++;
-		Gene newGene1 = new Gene(genotype.get(index).inNode, newNode, 1.0, true);
-		Gene newGene2 = new Gene(newNode, genotype.get(index).outNode, 1.0, true);
+		int[] genes = species().findGeneInNodeHistory(genotype.get(index).innovationNumber);
+		
+		Gene newGene1;
+		Gene newGene2;
+		if(genes != null)
+		{
+			int newNode = genes[2];
+			if(isCycle(newNode, genotype.get(index).inNode))
+			{
+				return false;
+			}
+			if(isCycle(genotype.get(index).outNode, newNode))
+			{
+				return false;
+			}
+			newGene1 = new Gene(genotype.get(index).inNode, newNode, newWeight(rand), true, genes[0]);
+			newGene2 = new Gene(newNode, genotype.get(index).outNode, newWeight(rand), true, genes[1]);
+		}
+		else
+		{
+			int newNode = species().inNodesNumber + species().outNodesNumber 
+					+ species().hiddenNodesNumber++;
+			newGene1 = new Gene(genotype.get(index).inNode, newNode, newWeight(rand), true, species().innovationNumber++);
+			newGene2 = new Gene(newNode, genotype.get(index).outNode, newWeight(rand), true, species().innovationNumber++);
+			
+			species().addGeneToNodeHistory(genotype.get(index).innovationNumber, newGene1.innovationNumber, newGene2.innovationNumber, newNode);
+		}
 		genotype.add(newGene1);
 		genotype.add(newGene2);
-		genotype.remove(index);
+		genotype.get(index).enable = false;
+		
+		
 		
 		return true;
 	}
 	
 	public boolean tryAddLinkMutation(MersenneTwisterFast rand)
 	{
-		int inNode = rand.nextInt(inNodesNumber + hiddenNodesNumber + outNodesNumber);
+		int inNode = rand.nextInt(species().inNodesNumber 
+				+ species().hiddenNodesNumber + species().outNodesNumber);
 		int outNode;
 		if(isOutNode(inNode))
 		{
-			outNode = inNodesNumber + rand.nextInt(outNodesNumber);
+			outNode = species().inNodesNumber + rand.nextInt(species().outNodesNumber);
 		}
 		else
 		{
-			outNode = inNodesNumber + rand.nextInt(outNodesNumber + hiddenNodesNumber);
+			outNode = species().inNodesNumber 
+					+ rand.nextInt(species().outNodesNumber + species().hiddenNodesNumber);
 		}
 		
 		if(isLinkAllowed(inNode, outNode))
 		{
-			Gene newGene = new Gene(inNode, outNode, 1.0, true);
-			genotype.add(newGene); //TODO funkcja do wag
+			Integer innum = species().findGeneInLinkHistory(inNode, outNode);
+			if(innum == null)
+			{
+				innum = species().innovationNumber++;
+				species().addGeneToLinkHistory(inNode, outNode, innum);
+			}
+			
+			Gene newGene = new Gene(inNode, outNode, newWeight(rand), true, innum);
+			genotype.add(newGene);
 			return true;
 		}
-		
 		return false;
 	}
 	
 	public void addLinkMutation(MersenneTwisterFast rand)
 	{
-		System.out.println("LM1: "+genotype.toString());
+		//System.out.println("LM1: "+genotype.toString());
 		for(int i = 0; i < TRYADDNUMBER; i++)
 		{
 			if(tryAddLinkMutation(rand))
@@ -177,7 +234,22 @@ public boolean isInNode(int node)
 				break;
 			}
 		}
-		System.out.println("LM2: "+genotype.toString());
+		//System.out.println("LM2: "+genotype.toString());
+	}
+	
+	public void weightMutation(MersenneTwisterFast rand)
+	{
+		for(Gene g : genotype)
+		{
+			if(rand.nextBoolean(species().randomWeightProbability))
+			{
+				g.weight = newWeight(rand);
+			}
+			else
+			{
+				g.weight *= (rand.nextDouble() * 0.2 + 0.9); //TODO Parametr?
+			}
+		}
 	}
 	
 	public boolean isLinkAllowed(int inNode, int outNode)
@@ -235,15 +307,17 @@ public boolean isInNode(int node)
 		return false;
 	}
 
-	public NeatNeuralNetworkIndividual crossover(NeatNeuralNetworkIndividual parent, MersenneTwisterFast rand)
+	public NeatIndividual crossover(NeatIndividual parent, MersenneTwisterFast rand)
 	{
-		NeatNeuralNetworkIndividual offspring = new NeatNeuralNetworkIndividual(inNodesNumber, outNodesNumber, 0, rand);
+		NeatIndividual offspring = 
+				new NeatIndividual(species().inNodesNumber, 
+						species().outNodesNumber, 0, rand, species);
 		
 		int i = 0;
 		int j = 0;
 		
-		System.out.println("P1: " + genotype.toString());
-		System.out.println("P2: " + parent.genotype.toString());
+		/*System.out.println("P1: " + genotype.toString());
+		System.out.println("P2: " + parent.genotype.toString());*/
 		while((i < this.genotype.size()) && (j < parent.genotype.size()))
 		{
 			if(this.genotype.get(i).innovationNumber == parent.genotype.get(j).innovationNumber)
@@ -284,6 +358,7 @@ public boolean isInNode(int node)
 			while(i < this.genotype.size())
 			{
 				offspring.genotype.add(this.genotype.get(i).clone());
+				++i;
 			}
 		}
 		if(parent.fitness.betterThan(this.fitness))
@@ -291,11 +366,12 @@ public boolean isInNode(int node)
 			while(j < parent.genotype.size())
 			{
 				offspring.genotype.add(parent.genotype.get(j).clone());
+				++j;
 			}
 		}
-		System.out.println("O:" + offspring.genotype.toString());
+		//System.out.println("O:" + offspring.genotype.toString());
 		
-		int max = 0;
+		/*int max = 0;
 		for(Gene g : offspring.genotype)
 		{
 			if(g.inNode > max)
@@ -313,7 +389,7 @@ public boolean isInNode(int node)
 		if(max >= offspring.hiddenNodesNumber)
 		{
 			offspring.hiddenNodesNumber = max + 1;
-		}
+		}*/
 		
 		offspring.fitness = new SimpleFitness();
 		offspring.species = this.species;
@@ -326,16 +402,22 @@ public boolean isInNode(int node)
 	
 	@Override
 	public Object clone() {
-		NeatNeuralNetworkIndividual clone = new NeatNeuralNetworkIndividual();
-		clone.genotype = this.genotype;
-		clone.hiddenNodesNumber = this.hiddenNodesNumber;
+		NeatIndividual clone = new NeatIndividual();
+		//clone.genotype = new ArrayList<Gene>(genotype);
+		clone.genotype = new ArrayList<Gene>();
+		for(int i = 0; i < genotype.size(); i++)
+		{
+			clone.genotype.add(genotype.get(i).clone());
+		}
+		/*clone.hiddenNodesNumber = this.hiddenNodesNumber;
 		clone.inNodesNumber = this.inNodesNumber;
-		clone.outNodesNumber = this.outNodesNumber;
+		clone.outNodesNumber = this.outNodesNumber;*/
 		if (this.fitness != null)
 		{
 			clone.fitness = (Fitness)(this.fitness.clone());
 		}
 		clone.species = this.species;
+		
 		return clone;
 	}
 

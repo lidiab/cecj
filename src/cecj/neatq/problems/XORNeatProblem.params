@@ -31,18 +31,20 @@ stat.file		= $out.stat
 pop.subpops		= 1
 pop.subpop.0		= ec.Subpopulation
 
-pop.subpop.0.size 		= 10
+pop.subpop.0.size 		= 150
 pop.subpop.0.duplicate-retries 	= 0
 pop.subpop.0.species 		= cecj.neatq.NeatNeuralNetworkSpecies
 
 pop.subpop.0.species.fitness 	= ec.simple.SimpleFitness
-pop.subpop.0.species.ind	= cecj.neatq.NeatNeuralNetworkIndividual
+pop.subpop.0.species.ind	= cecj.neatq.NeatIndividual
 
-pop.subpop.0.species.addLinkMutationProbability	= 0.5
-pop.subpop.0.species.addNodeMutationProbability	= 0.5
-pop.subpop.0.species.inNodesNumber	= 2
+pop.subpop.0.species.addLinkMutationProbability	= 0.05
+pop.subpop.0.species.addNodeMutationProbability	= 0.03
+pop.subpop.0.species.inNodesNumber	= 3
 pop.subpop.0.species.outNodesNumber	= 1
-pop.subpop.0.species.initialLinkNumber	= 2
+pop.subpop.0.species.initialLinkNumber	= 3
+pop.subpop.0.species.weightMutationProbability	= 0.8
+pop.subpop.0.species.randomWeightProbability	= 0.1
 
 pop.subpop.0.species.pipe			= cecj.neatq.NeatMutationPipeline
 pop.subpop.0.species.pipe.source.0		= cecj.neatq.NeatCrossoverPipeline

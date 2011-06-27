@@ -15,6 +15,10 @@ public class NeuralNetworkFenotype {
 			this.inNeuron = inNeuron;
 			this.weight = weight;
 		}
+		public String toString()
+		{
+			return "" + inNeuron.neuronID;
+		}
 	}
 	
 	public static class Neuron
@@ -45,14 +49,14 @@ public class NeuralNetworkFenotype {
 		
 		public void evalNeuron()
 		{
-			if(prevNeurons != null)
+			if(/*prevNeurons != null && */prevNeurons.size() > 0)
 			{
 				value = 0;
 				for(Link l : prevNeurons)
 				{
 					value += l.weight * l.inNeuron.value;
 				}
-				value = 1.0 / (1.0 + Math.exp(value));
+				value = 1.0 / (1.0 + Math.exp(value * -4.9));
 			}
 		}
 		
@@ -62,11 +66,11 @@ public class NeuralNetworkFenotype {
 		}
 	}
 	
-	ArrayList<Neuron> fenotype;
+	public ArrayList<Neuron> fenotype;
 	ArrayList<Neuron> inputs;
 	ArrayList<Neuron> outputs;
 	
-	public NeuralNetworkFenotype(NeatNeuralNetworkIndividual genotype)
+	public NeuralNetworkFenotype(NeatIndividual genotype)
 	{
 		fenotype = new ArrayList<Neuron>();
 		inputs = new ArrayList<Neuron>();
@@ -74,7 +78,7 @@ public class NeuralNetworkFenotype {
 		readFromGenotype(genotype);
 	}
 	
-	public Neuron findGene(int id, NeatNeuralNetworkIndividual genotype)
+	public Neuron findGene(int id, NeatIndividual genotype)
 	{
 		for(Neuron n : fenotype)
 		{
@@ -101,10 +105,14 @@ public class NeuralNetworkFenotype {
 	}
 	
 	
-	public void readFromGenotype(NeatNeuralNetworkIndividual genotype)
+	public void readFromGenotype(NeatIndividual genotype)
 	{
-		for(NeatNeuralNetworkIndividual.Gene g : genotype.genotype)
+		for(NeatIndividual.Gene g : genotype.genotype)
 		{
+			if(! g.enable)
+			{
+				continue;
+			}
 			Neuron inNeuron = findGene(g.inNode, genotype);
 			
 			Neuron outNeuron = findGene(g.outNode, genotype);
@@ -163,6 +171,10 @@ public class NeuralNetworkFenotype {
 					fenotype.add(n);
 					stack.pop();
 				}
+			}
+			else 
+			{
+				stack.pop();
 			}
 		}
 	}

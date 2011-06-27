@@ -35,7 +35,7 @@ public class NeatMutationPipeline extends BreedingPipeline
 			for (int q = start; q < n + start; q++)
 				inds[q] = (Individual) (inds[q].clone());
 
-		if (!(inds[start] instanceof NeatNeuralNetworkIndividual))
+		if (!(inds[start] instanceof NeatIndividual))
 			state.output
 					.fatal("NeatMutationPipeline didn't get an NeatNeuralNetworkIndividual."
 							+ "The offending individual is in subpopulation "
@@ -44,7 +44,7 @@ public class NeatMutationPipeline extends BreedingPipeline
 		NeatNeuralNetworkSpecies species = (NeatNeuralNetworkSpecies) (inds[start].species);
 
 		for (int q = start; q < n + start; q++) {
-			NeatNeuralNetworkIndividual ind = (NeatNeuralNetworkIndividual) inds[q];
+			NeatIndividual ind = (NeatIndividual) inds[q];
 			if(state.random[thread].nextBoolean(species.addLinkMutationProbability))
 			{
 				ind.addLinkMutation(state.random[thread]);
@@ -52,6 +52,10 @@ public class NeatMutationPipeline extends BreedingPipeline
 			if(state.random[thread].nextBoolean(species.addNodeMutationProbability))
 			{
 				ind.addNodeMutation(state.random[thread]);
+			}
+			if(state.random[thread].nextBoolean(species.weightMutationProbability))
+			{
+				ind.weightMutation(state.random[thread]);
 			}
 			ind.evaluated = false;
 		}

@@ -1,7 +1,9 @@
 package cecj.neatq.problems;
 
-import cecj.neatq.NeatNeuralNetworkIndividual;
+import cecj.neatq.NeatIndividual;
+import cecj.neatq.NeatIndividual.Gene;
 import cecj.neatq.NeuralNetworkFenotype;
+import cecj.neatq.NeuralNetworkIndividual;
 import ec.EvolutionState;
 import ec.Individual;
 import ec.Problem;
@@ -13,11 +15,23 @@ public class XORNeatProblem extends Problem implements SimpleProblemForm {
 	public void evaluate(EvolutionState state, Individual ind,
 			int subpopulation, int threadnum) 
 	{
+		NeatIndividual ni = (NeatIndividual)ind;
+		System.out.println("Evaluating");
+		/*for (Gene g : ni.genotype)
+		{
+			System.out.println(g);
+		}*/
+		
 		System.out.println("fit... ");
 		
-		NeuralNetworkFenotype fenotype = new NeuralNetworkFenotype((NeatNeuralNetworkIndividual)ind);
+		NeuralNetworkFenotype fenotype = new NeuralNetworkFenotype((NeatIndividual)ind);
 		
-		double[][] inputs = {{0, 0}, {0, 1}, {1, 0}, {1, 1}};
+		/*for(NeuralNetworkFenotype.Neuron n : fenotype.fenotype)
+		{
+			System.out.println(n);
+		}*/
+		
+		double[][] inputs = {{0, 0, 1}, {0, 1, 1}, {1, 0, 1}, {1, 1, 1}};
 		double[][] expOutputs = {{0}, {1}, {1}, {0}};
 		double fit = 0.0;
 		
@@ -29,7 +43,7 @@ public class XORNeatProblem extends Problem implements SimpleProblemForm {
 		fit = 4.0 - fit;
 		fit = fit * fit;
 		
-		((SimpleFitness)ind.fitness).setFitness(state, (float)fit, false);
+		((SimpleFitness)ind.fitness).setFitness(state, (float)fit, fit == 16);
 		
 		System.out.println("DONE ");
 	}

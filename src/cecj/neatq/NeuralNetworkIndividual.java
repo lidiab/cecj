@@ -13,7 +13,7 @@ public abstract class NeuralNetworkIndividual extends Individual {
 	public double[][][] weights;
 	
 	public NeuralNetworkIndividual(int[] numberOfNeurons) {
-		MersenneTwisterFast rand = new MersenneTwisterFast(); //TODO eziac z ecj
+		MersenneTwisterFast rand = new MersenneTwisterFast(); 
 		
 		this.numberOfNeurons = new int[numberOfNeurons.length];
 		for(int i = 0; i < numberOfNeurons.length; i++)
