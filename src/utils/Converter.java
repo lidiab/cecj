@@ -4,7 +4,8 @@ import java.util.ArrayList;
 
 import ec.Individual;
 
-public abstract class Converter {
 
-	public abstract ArrayList<Link> convert(Object obj);
+public abstract interface Converter {
+
+	public abstract ArrayList<Link> convert(Individual ind);
 }

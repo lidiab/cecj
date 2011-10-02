@@ -79,7 +79,7 @@ public class GraphViz
     * Where is your dot program located? It will be called externally.
     */
  //  private static String DOT = "/usr/bin/dot";	// Linux
-   private static String DOT = "c:/Program Files/Graphviz2.26.3/bin/dot.exe";	// Windows
+   private static String DOT = "c:/Program Files/Graphviz 2.28/bin/dot.exe";	// Windows
 
    /**
     * The source of the graph written in dot language.

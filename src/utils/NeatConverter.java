@@ -2,16 +2,26 @@ package utils;
 
 import java.util.ArrayList;
 
-import cecj.neatq.NeatIndividual;
+import cecj.neat.NeatIndividual;
+import ec.Individual;
 
-public class NeatConverter extends Converter {
+public class NeatConverter implements Converter {
 
-	public ArrayList<Link> convert(Object obj) {
-		NeatIndividual ind = (NeatIndividual) obj;
+	public ArrayList<Link> convert(Individual ind) {
+		NeatIndividual neatind = (NeatIndividual) ind;
 		
-		//TODO konwersja
+		ArrayList<Link> l = new ArrayList<Link>();
 		
-		return null;
+		for(NeatIndividual.Gene g : neatind.genotype)
+		{
+			if(g.enable)
+			{
+				l.add(new Link(g.inNode, g.outNode));
+			}
+		}
+		
+		
+		return l;
 	}
 
 }

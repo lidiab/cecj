@@ -1,4 +1,4 @@
-package cecj.neatq;
+package cecj.neat;
 
 import ec.BreedingPipeline;
 import ec.EvolutionState;
@@ -37,11 +37,11 @@ public class NeatMutationPipeline extends BreedingPipeline
 
 		if (!(inds[start] instanceof NeatIndividual))
 			state.output
-					.fatal("NeatMutationPipeline didn't get an NeatNeuralNetworkIndividual."
+					.fatal("NeatMutationPipeline didn't get an NeatIndividual."
 							+ "The offending individual is in subpopulation "
 							+ subpopulation + " and it's:" + inds[start]);
 		
-		NeatNeuralNetworkSpecies species = (NeatNeuralNetworkSpecies) (inds[start].species);
+		NeatSpecies species = (NeatSpecies) (inds[start].species);
 
 		for (int q = start; q < n + start; q++) {
 			NeatIndividual ind = (NeatIndividual) inds[q];

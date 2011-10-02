@@ -1,9 +1,9 @@
-package cecj.neatq;
+package cecj.neat;
 
 import java.util.ArrayList;
 import java.util.Stack;
 
-public class NeuralNetworkFenotype {
+public class NeatPhenotype {
 
 	private static class Link
 	{
@@ -70,7 +70,7 @@ public class NeuralNetworkFenotype {
 	ArrayList<Neuron> inputs;
 	ArrayList<Neuron> outputs;
 	
-	public NeuralNetworkFenotype(NeatIndividual genotype)
+	public NeatPhenotype(NeatIndividual genotype)
 	{
 		fenotype = new ArrayList<Neuron>();
 		inputs = new ArrayList<Neuron>();
@@ -107,6 +107,7 @@ public class NeuralNetworkFenotype {
 	
 	public void readFromGenotype(NeatIndividual genotype)
 	{
+		//System.out.println(genotype);
 		for(NeatIndividual.Gene g : genotype.genotype)
 		{
 			if(! g.enable)
@@ -132,6 +133,7 @@ public class NeuralNetworkFenotype {
 	
 	public void topologicalSort()
 	{
+		
 		Stack<Neuron> stack = new Stack<Neuron>();
 		
 		for(Neuron n : inputs)

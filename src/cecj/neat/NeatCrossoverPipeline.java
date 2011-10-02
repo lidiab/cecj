@@ -1,4 +1,4 @@
-package cecj.neatq;
+package cecj.neat;
 
 import ec.BreedingPipeline;
 import ec.EvolutionState;
